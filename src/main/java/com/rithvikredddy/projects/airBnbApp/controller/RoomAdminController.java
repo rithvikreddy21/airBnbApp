@@ -38,4 +38,9 @@ public class RoomAdminController {
         return ResponseEntity.noContent().build();
     }
 
+    @PatchMapping("/{roomId}/change/{roomType}")
+    public ResponseEntity<RoomDto> updateRoomType(@PathVariable Long roomId,@PathVariable String roomType){
+        return ResponseEntity.ok(roomService.updateRoomTypeById(roomId,roomType));
+    }
+
 }

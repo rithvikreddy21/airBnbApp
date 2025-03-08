@@ -74,4 +74,15 @@ public class RoomServiceImpl implements RoomService{
         inventoryService.deleteAllInventories(room);
         roomRepository.deleteById(roomId);
     }
+
+    @Override
+    @Transactional
+    public RoomDto updateRoomTypeById(Long roomId, String roomType) {
+        log.info("Updating the room type for room with ID: {}",roomId);
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(()-> new ResourceNotFoundException("Room not found with Id: "+roomId));
+        room.setType(roomType);
+        roomRepository.save(room);
+        return modelMapper.map(room,RoomDto.class);
+    }
 }
