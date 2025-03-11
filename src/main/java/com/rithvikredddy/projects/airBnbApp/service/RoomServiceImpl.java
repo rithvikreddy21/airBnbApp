@@ -4,13 +4,16 @@ import com.rithvikredddy.projects.airBnbApp.dto.HotelDto;
 import com.rithvikredddy.projects.airBnbApp.dto.RoomDto;
 import com.rithvikredddy.projects.airBnbApp.entity.Hotel;
 import com.rithvikredddy.projects.airBnbApp.entity.Room;
+import com.rithvikredddy.projects.airBnbApp.entity.User;
 import com.rithvikredddy.projects.airBnbApp.exception.ResourceNotFoundException;
+import com.rithvikredddy.projects.airBnbApp.exception.UnAuthorizedException;
 import com.rithvikredddy.projects.airBnbApp.repository.HotelRepository;
 import com.rithvikredddy.projects.airBnbApp.repository.RoomRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,6 +35,10 @@ public class RoomServiceImpl implements RoomService{
         log.info("Creating new room in a hotel with Id: {}",hotelId);
         Hotel hotel = hotelRepository.findById(hotelId)
                 .orElseThrow(()-> new ResourceNotFoundException("Hotel not found with Id: " + hotelId));
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(!user.equals(hotel.getOwner())){
+            throw new UnAuthorizedException("This user does not own this hotel with id: "+hotelId);
+        }
         Room room = modelMapper.map(roomDto,Room.class);
         room.setHotel(hotel);
         room = roomRepository.save(room);
@@ -66,11 +73,12 @@ public class RoomServiceImpl implements RoomService{
     @Transactional
     public void deleteRoomById(Long roomId) {
         log.info("Deleting room with Id: {}",roomId);
-        boolean exists = roomRepository.existsById(roomId);
-        if(!exists)
-            throw new ResourceNotFoundException("Room not found with Id: " + roomId);
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(()-> new ResourceNotFoundException("Room not found with Id : " + roomId));
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(!user.equals(room.getHotel().getOwner())){
+            throw new UnAuthorizedException("This user does not own this room with id: "+roomId);
+        }
         inventoryService.deleteAllInventories(room);
         roomRepository.deleteById(roomId);
     }
