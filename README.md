@@ -11,4 +11,4 @@ This is a Java backend implementation of a simplified Airbnb-style application. 
 6. Booking
 7. HotelContactInfo
 
-
+![entities_img](https://github.com/rithvikreddy21/airBnbApp/blob/f4339cd66096d5aaa5ecbf1cf4291b1d39c3fc2d/airbnbEntities.png)
